@@ -1,7 +1,7 @@
 
 Konduru Priyavarsha
 ECE Student and Aspiring Python Developer
-I am an Electronics and Communication Engineering student at Rishi MS Institute of Engineering and Technology for Women (p. 1). I am passionate about software development and bridging the gap between hardware systems and high-level Python programming.
+I am an Electronics and Communication Engineering student at Rishi MS Institute of Engineering and Technology for Women. I am passionate about software development and bridging the gap between hardware systems and high-level Python programming.
 ------------------------------
 Focus and Learning
 
