@@ -1,0 +1,88 @@
+
+        from machine import Pin, I2C
+         import uptime
+         import network
+         import requests
+        from mfrc522 import MFRC522
+        from lcd_api import LCD Api
+        from i2c_lcd import I2cLcd
+        # LCD Setup
+              i2c = I2C(0, sda=Pin(0), scl=Pin(1), freq=400000)
+              lcd = I2cLcd(i2c, 0x27, 2, 16)
+          # Buzzer
+               buzzer = Pin(10, Pin.OUT)
+           # RFID Setup
+                 spi_sck = Pin (2)
+                 spi_mosi = Pin (3)
+     spi_miso = Pin (4)
+     spi_rst = Pin (6)
+                 spi_cs = Pin (5)
+       reader = MFRC522(spi_sck, spi_mosi, spi_miso, spi_rst, spi_cs)
+
+# Wi-Fi Config
+SSID = "YourSSID"
+PASSWORD = "YourPassword"
+SERVER_URL = "http://your-server.com/order"  # Replace with actual endpoint
+
+       def connect_wifi():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    wlan.connect(SSID, PASSWORD)
+    lcd.clear()
+    lcd.putstr("Connecting WiFi")
+    while not wlan.isconnected():
+     utime.sleep(1)
+    lcd.clear()
+    lcd.putstr("WiFi Connected")
+
+def read_card():
+    lcd.clear()
+    lcd.putstr("Scan Your Card")
+    while True:
+        (stat, tag_type) = reader.request(reader.REQIDL)
+        if stat == reader.OK:
+            (stat, raw_uid) = reader.anticoll()
+            if stat == reader.OK:
+                card_id = ''.join([str(hex(i))[2:].zfill(2) for i in raw_uid])
+                return card_id.upper()
+
+def show_menu():
+    lcd.clear()
+    lcd.putstr("1.Burger 2.Pizza")
+    utime.sleep(2)
+    lcd.clear()
+    lcd.putstr("3.Coffee 4.Exit")
+
+def send_order(card_id, order="Pizza"):
+    try:
+        data = {"card_id": card_id, "order": order}
+        response = urequests.post(SERVER_URL, json=data)
+        response.close()
+        return True
+    except:
+        return False
+
+def main():
+    connect_wifi()
+    while True:
+        card_id = read_card()
+        buzzer.value(1)
+        utime.sleep(0.1)
+        buzzer.value(0)
+        lcd.clear()
+        lcd.putstr("Hello User: ")
+        lcd.putstr(card_id[-4:])
+        utime.sleep(1)
+        
+        show_menu()
+        lcd.clear()
+        lcd.putstr("Sending Order...")
+        if send_order(card_id, "Pizza"):  # Default order here
+            lcd.clear()
+            lcd.putstr("Order Sent!")
+        else:
+            lcd.clear()
+            lcd.putstr("Send Failed!")
+        utime.sleep(3)
+
+main()
